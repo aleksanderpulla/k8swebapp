@@ -1,134 +1,153 @@
 import 'dotenv/config';
-import { db } from "../index"; // <-- your Drizzle instance
+import { db } from "./db"; // <-- your Drizzle instance
 import { users, transactions, assets, portfolioHoldings } from "./schema";
 
-// ----------------------
-// SEED USERS
-// ----------------------
-const userData = [
-  { fullName: "Alice Johnson", email: "alice@fintech.com", accountType: "Personal" },
-  { fullName: "Bob Smith", email: "bob@fintech.com", accountType: "Business" },
-  { fullName: "Carla Nguyen", email: "carla@fintech.com", accountType: "Personal" },
-  { fullName: "David Kim", email: "david@fintech.com", accountType: "Investor" },
-  { fullName: "Emma Rossi", email: "emma@fintech.com", accountType: "Personal" },
-];
+// ...existing code...
+
+const TOTAL = 1000;
+const CHUNK_SIZE = 200;
+
+function chunkArray<T>(arr: T[], size = CHUNK_SIZE) {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function randInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function randFloat(min: number, max: number, decimals = 2) {
+  return (Math.random() * (max - min) + min).toFixed(decimals);
+}
+
+function generateUsers(n = TOTAL) {
+  const accountTypes = ["Personal", "Business", "Investor", "Institutional"];
+  const arr = [];
+  for (let i = 1; i <= n; i++) {
+    arr.push({
+      fullName: `User ${i}`,
+      email: `user${i}@example.com`,
+      accountType: accountTypes[i % accountTypes.length],
+    });
+  }
+  return arr;
+}
+
+function generateAssets(n = TOTAL) {
+  const categories = ["Stock", "Crypto", "ETF", "Bond"];
+  const arr = [];
+  for (let i = 1; i <= n; i++) {
+    const category = categories[i % categories.length];
+    // Give cryptos higher typical prices sometimes
+    const price =
+      category === "Crypto"
+        ? randFloat(100, 70000, 2)
+        : randFloat(1, 2000, 2);
+    arr.push({
+      symbol: `ASSET${String(i).padStart(4, "0")}`,
+      name: `Asset ${i}`,
+      category,
+      currentPrice: String(price),
+    });
+  }
+  return arr;
+}
 
 async function seedUsers() {
-  await db.insert(users).values(userData);
-  console.log("✅ Users seeded");
+  const data = generateUsers();
+  const chunks = chunkArray(data);
+  for (const chunk of chunks) {
+    await db.insert(users).values(chunk);
+  }
+  console.log(`✅ ${data.length} Users seeded`);
 }
-
-// ----------------------
-// SEED ASSETS
-// ----------------------
-const assetData = [
-  { symbol: "AAPL", name: "Apple Inc.", category: "Stock", currentPrice: "183.24" },
-  { symbol: "GOOG", name: "Alphabet Inc.", category: "Stock", currentPrice: "132.12" },
-  { symbol: "BTC", name: "Bitcoin", category: "Crypto", currentPrice: "67000.50" },
-  { symbol: "ETH", name: "Ethereum", category: "Crypto", currentPrice: "2500.80" },
-  { symbol: "TSLA", name: "Tesla Inc.", category: "Stock", currentPrice: "255.11" },
-];
 
 async function seedAssets() {
-  await db.insert(assets).values(assetData);
-  console.log("✅ Assets seeded");
+  const data = generateAssets();
+  const chunks = chunkArray(data);
+  for (const chunk of chunks) {
+    await db.insert(assets).values(chunk);
+  }
+  console.log(`✅ ${data.length} Assets seeded`);
 }
 
-// ----------------------
-// SEED PORTFOLIO HOLDINGS
-// ----------------------
 async function seedHoldings() {
   const allUsers = await db.select().from(users);
   const allAssets = await db.select().from(assets);
 
-  const holdingsData = [
-    {
-      userId: allUsers[0].id,
-      assetId: allAssets[2].id, // BTC
-      quantity: "0.85",
-      avgPrice: "48000.00",
-    },
-    {
-      userId: allUsers[0].id,
-      assetId: allAssets[0].id, // AAPL
-      quantity: "15",
-      avgPrice: "172.50",
-    },
-    {
-      userId: allUsers[1].id,
-      assetId: allAssets[4].id, // TSLA
-      quantity: "10",
-      avgPrice: "245.00",
-    },
-    {
-      userId: allUsers[2].id,
-      assetId: allAssets[3].id, // ETH
-      quantity: "5.2",
-      avgPrice: "2200.00",
-    },
-    {
-      userId: allUsers[3].id,
-      assetId: allAssets[1].id, // GOOG
-      quantity: "8",
-      avgPrice: "125.00",
-    },
-  ];
+  if (allUsers.length === 0 || allAssets.length === 0) {
+    throw new Error("Users or assets missing for holdings seeding");
+  }
 
-  await db.insert(portfolioHoldings).values(holdingsData);
-  console.log("✅ Portfolio holdings seeded");
+  const holdingsData = [];
+  for (let i = 0; i < TOTAL; i++) {
+    const user = allUsers[randInt(0, allUsers.length - 1)];
+    const asset = allAssets[randInt(0, allAssets.length - 1)];
+    const qty = randFloat(0.01, 200, 6); // smaller precision for quantity
+    const avgPrice = randFloat(
+      Math.max(0.01, parseFloat(asset.currentPrice) * 0.5),
+      parseFloat(asset.currentPrice) * 1.5,
+      2
+    );
+    holdingsData.push({
+      userId: user.id,
+      assetId: asset.id,
+      quantity: String(qty),
+      avgPrice: String(avgPrice),
+    });
+  }
+
+  const chunks = chunkArray(holdingsData);
+  for (const chunk of chunks) {
+    await db.insert(portfolioHoldings).values(chunk);
+  }
+  console.log(`✅ ${holdingsData.length} Portfolio holdings seeded`);
 }
 
-// ----------------------
-// SEED TRANSACTIONS
-// ----------------------
 async function seedTransactions() {
   const allUsers = await db.select().from(users);
+  if (allUsers.length === 0) {
+    throw new Error("Users missing for transactions seeding");
+  }
 
-  const txData = [
-    {
-      userId: allUsers[0].id,
-      amount: "500.00",
-      currency: "USD",
-      type: "Deposit",
-      status: "completed",
-    },
-    {
-      userId: allUsers[0].id,
-      amount: "-200.00",
-      currency: "USD",
-      type: "Stock Purchase",
-      status: "completed",
-    },
-    {
-      userId: allUsers[1].id,
-      amount: "1000.00",
-      currency: "USD",
-      type: "Deposit",
-      status: "completed",
-    },
-    {
-      userId: allUsers[2].id,
-      amount: "-500.00",
-      currency: "USD",
-      type: "Crypto Purchase",
-      status: "pending",
-    },
-    {
-      userId: allUsers[4].id,
-      amount: "250.00",
-      currency: "USD",
-      type: "Deposit",
-      status: "completed",
-    },
+  const types = [
+    "Deposit",
+    "Withdrawal",
+    "Stock Purchase",
+    "Crypto Purchase",
+    "Fee",
+    "Dividend",
   ];
+  const statusOptions = ["completed", "pending", "failed"];
 
-  await db.insert(transactions).values(txData);
-  console.log("✅ Transactions seeded");
+  const txData = [];
+  for (let i = 0; i < TOTAL; i++) {
+    const user = allUsers[randInt(0, allUsers.length - 1)];
+    const type = types[randInt(0, types.length - 1)];
+    // Deposits and dividends positive, purchases/withdrawals/fees negative
+    let amount = parseFloat(randFloat(1, 10000, 2));
+    if (["Withdrawal", "Stock Purchase", "Crypto Purchase", "Fee"].includes(type)) {
+      amount = -amount;
+    }
+    txData.push({
+      userId: user.id,
+      amount: String(amount.toFixed(2)),
+      currency: "USD",
+      type,
+      status: statusOptions[randInt(0, statusOptions.length - 1)],
+    });
+  }
+
+  const chunks = chunkArray(txData);
+  for (const chunk of chunks) {
+    await db.insert(transactions).values(chunk);
+  }
+  console.log(`✅ ${txData.length} Transactions seeded`);
 }
 
-// ----------------------
-// RUN SEEDING
-// ----------------------
 async function runSeed() {
   await seedUsers();
   await seedAssets();
