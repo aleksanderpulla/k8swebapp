@@ -9,6 +9,8 @@ import portfolioRouter from './routes/portfolio';
 import transactionsRouter from './routes/transactions';
 import dashboardRouter from './routes/dashboard';
 import cors from 'cors';
+import { d } from 'drizzle-kit/index-BAUrj6Ib';
+import documentsRouter from './routes/documents';
 
 // Initialize Express app
 const app = express();
@@ -37,6 +39,7 @@ app.use('/api/assets', assetsRouter);
 app.use('/api/portfolio', portfolioRouter);
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/documents', documentsRouter);
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {

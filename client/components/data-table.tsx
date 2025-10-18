@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import {
   closestCenter,
@@ -52,6 +54,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 import { useIsMobile } from ".././hooks/use-mobile"
+import { useDocuments, type Document } from ".././hooks/useDocuments"
 import { Badge } from ".././components/ui/badge"
 import { Button } from ".././components/ui/button"
 import {
@@ -134,7 +137,7 @@ function DragHandle({ id }: { id: number }) {
   )
 }
 
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
+const columns: ColumnDef<Document>[] = [
   {
     id: "drag",
     header: () => null,
@@ -309,7 +312,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   },
 ]
 
-function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
+function DraggableRow({ row }: { row: Row<Document> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   })
@@ -334,12 +337,9 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   )
 }
 
-export function DataTable({
-  data: initialData,
-}: {
-  data: z.infer<typeof schema>[]
-}) {
-  const [data, setData] = React.useState(() => initialData)
+export function DataTable() {
+  const { documents, loading, error } = useDocuments()
+  const [data, setData] = React.useState<Document[]>([])
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -357,6 +357,13 @@ export function DataTable({
     useSensor(TouchSensor, {}),
     useSensor(KeyboardSensor, {})
   )
+
+  // Update data when documents are fetched
+  React.useEffect(() => {
+    if (documents.length > 0) {
+      setData(documents)
+    }
+  }, [documents])
 
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
@@ -397,6 +404,22 @@ export function DataTable({
         return arrayMove(data, oldIndex, newIndex)
       })
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-muted-foreground">Loading documents...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    )
   }
 
   return (
@@ -645,7 +668,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
+function TableCellViewer({ item }: { item: Document }) {
   const isMobile = useIsMobile()
 
   return (
@@ -659,7 +682,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         <DrawerHeader className="gap-1">
           <DrawerTitle>{item.header}</DrawerTitle>
           <DrawerDescription>
-            Showing total visitors for the last 6 months
+            Document type: {item.type}
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4 text-sm">
@@ -708,13 +731,11 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <Separator />
               <div className="grid gap-2">
                 <div className="flex gap-2 leading-none font-medium">
-                  Trending up by 5.2% this month{" "}
+                  {item.status === "Done" ? "Completed" : "In Progress"}{" "}
                   <IconTrendingUp className="size-4" />
                 </div>
                 <div className="text-muted-foreground">
-                  Showing total visitors for the last 6 months. This is just
-                  some random text to test the layout. It spans multiple lines
-                  and should wrap around.
+                  Status: {item.status} | Reviewer: {item.reviewer}
                 </div>
               </div>
               <Separator />
@@ -733,22 +754,10 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Table of Contents">
-                      Table of Contents
-                    </SelectItem>
-                    <SelectItem value="Executive Summary">
-                      Executive Summary
-                    </SelectItem>
-                    <SelectItem value="Technical Approach">
-                      Technical Approach
-                    </SelectItem>
-                    <SelectItem value="Design">Design</SelectItem>
-                    <SelectItem value="Capabilities">Capabilities</SelectItem>
-                    <SelectItem value="Focus Documents">
-                      Focus Documents
-                    </SelectItem>
-                    <SelectItem value="Narrative">Narrative</SelectItem>
-                    <SelectItem value="Cover Page">Cover Page</SelectItem>
+                    <SelectItem value="Report">Report</SelectItem>
+                    <SelectItem value="Documentation">Documentation</SelectItem>
+                    <SelectItem value="Technical">Technical</SelectItem>
+                    <SelectItem value="Security">Security</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -760,8 +769,7 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Done">Done</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Not Started">Not Started</SelectItem>
+                    <SelectItem value="In Process">In Process</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -787,7 +795,8 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
                   <SelectItem value="Jamik Tashpulatov">
                     Jamik Tashpulatov
                   </SelectItem>
-                  <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Analyst">Analyst</SelectItem>
                 </SelectContent>
               </Select>
             </div>
