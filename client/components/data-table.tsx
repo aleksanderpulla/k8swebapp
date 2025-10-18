@@ -171,7 +171,7 @@ const columns: ColumnDef<Document>[] = [
   },
   {
     accessorKey: "header",
-    header: "Header",
+    header: "Document",
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />
     },
@@ -179,7 +179,7 @@ const columns: ColumnDef<Document>[] = [
   },
   {
     accessorKey: "type",
-    header: "Section Type",
+    header: "Type",
     cell: ({ row }) => (
       <div className="w-32">
         <Badge variant="outline" className="text-muted-foreground px-1.5">
@@ -202,56 +202,56 @@ const columns: ColumnDef<Document>[] = [
       </Badge>
     ),
   },
-  {
-    accessorKey: "target",
-    header: () => <div className="w-full text-right">Target</div>,
-    cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-          Target
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.target}
-          id={`${row.original.id}-target`}
-        />
-      </form>
-    ),
-  },
-  {
-    accessorKey: "limit",
-    header: () => <div className="w-full text-right">Limit</div>,
-    cell: ({ row }) => (
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: `Saving ${row.original.header}`,
-            success: "Done",
-            error: "Error",
-          })
-        }}
-      >
-        <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-          Limit
-        </Label>
-        <Input
-          className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
-          defaultValue={row.original.limit}
-          id={`${row.original.id}-limit`}
-        />
-      </form>
-    ),
-  },
+  // {
+  //   accessorKey: "target",
+  //   header: () => <div className="w-full text-right">Target</div>,
+  //   cell: ({ row }) => (
+  //     <form
+  //       onSubmit={(e) => {
+  //         e.preventDefault()
+  //         toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
+  //           loading: `Saving ${row.original.header}`,
+  //           success: "Done",
+  //           error: "Error",
+  //         })
+  //       }}
+  //     >
+  //       <Label htmlFor={`${row.original.id}-target`} className="sr-only">
+  //         Target
+  //       </Label>
+  //       <Input
+  //         className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+  //         defaultValue={row.original.target}
+  //         id={`${row.original.id}-target`}
+  //       />
+  //     </form>
+  //   ),
+  // },
+  // {
+  //   accessorKey: "limit",
+  //   header: () => <div className="w-full text-right">Limit</div>,
+  //   cell: ({ row }) => (
+  //     <form
+  //       onSubmit={(e) => {
+  //         e.preventDefault()
+  //         toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
+  //           loading: `Saving ${row.original.header}`,
+  //           success: "Done",
+  //           error: "Error",
+  //         })
+  //       }}
+  //     >
+  //       <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
+  //         Limit
+  //       </Label>
+  //       <Input
+  //         className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
+  //         defaultValue={row.original.limit}
+  //         id={`${row.original.id}-limit`}
+  //       />
+  //     </form>
+  //   ),
+  // },
   {
     accessorKey: "reviewer",
     header: "Reviewer",
