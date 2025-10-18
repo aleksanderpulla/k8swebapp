@@ -1,14 +1,16 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Portfolio management API server",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
     "db:generate": "drizzle-kit generate --dialect postgresql --schema ./src/db/schema.ts --out ./src/db/migrations",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx ./src/db/seed.ts",
-    "dev": "tsx watch src/index.ts"
+    "db:seed": "tsx ./src/db/seed.ts"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +27,7 @@
     "@types/node": "^20.3.1",
     "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.5",
-    "tsx": "^4.20.6"
+    "tsx": "^4.20.6",
+    "typescript": "^5.1.3"
   }
 }
