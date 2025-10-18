@@ -14,13 +14,39 @@ import { useDashboardMetrics } from "../hooks/useDashboard";
 export function SectionCards() {
   const { metrics } = useDashboardMetrics();
 
+  // Format currency with K/M suffixes
+  const formatCurrency = (value: string | number | undefined): string => {
+    if (!value) return "$0.00";
+    
+    const num = typeof value === "string" ? parseFloat(value) : value;
+    
+    if (isNaN(num)) return "$0.00";
+    
+    if (num >= 1_000_000) {
+      return `$${(num / 1_000_000).toFixed(2)}M`;
+    } else if (num >= 1_000) {
+      return `$${(num / 1_000).toFixed(2)}K`;
+    }
+    
+    return `$${num.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
+
+  // Format large numbers with commas
+  const formatNumber = (value: number | undefined): string => {
+    if (!value) return "0";
+    return value.toLocaleString("en-US");
+  };
+
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Total Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            ${metrics?.totalRevenue}
+            {formatCurrency(metrics?.totalRevenue)}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -42,7 +68,7 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>New Customers</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {metrics?.newCustomers}
+            {formatNumber(metrics?.newCustomers)}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">
@@ -64,7 +90,7 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Active Accounts</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {metrics?.activeAccounts}
+            {formatNumber(metrics?.activeAccounts)}
           </CardTitle>
           <CardAction>
             <Badge variant="outline">

@@ -15,7 +15,7 @@ dashboardRouter.get('/metrics', async (req: express.Request, res: express.Respon
         total: sql<number>`CAST(COALESCE(SUM(${transactions.amount}), 0) AS NUMERIC(12, 2))`,
       })
       .from(transactions)
-      .where(eq(transactions.type, 'Deposit'));
+      .where(eq(transactions.type, 'deposit'));
 
     const totalRevenue = Number(revenueResult[0]?.total || 0);
 
