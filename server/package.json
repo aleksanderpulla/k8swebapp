@@ -9,11 +9,11 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx ./src/db/seed.ts",
     "dev": "tsx watch src/index.ts"
-
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "express": "^5.1.0",

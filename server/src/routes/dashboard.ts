@@ -70,7 +70,7 @@ dashboardRouter.get('/visitors', async (req: express.Request, res: express.Respo
       .where(
         gte(
           transactions.createdAt,
-          sql`NOW() - INTERVAL '${days} days'`
+          sql`NOW() - INTERVAL '90 days'`
         )
       )
       .groupBy(sql`DATE(${transactions.createdAt})`)

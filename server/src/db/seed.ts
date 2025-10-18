@@ -1,161 +1,245 @@
-import 'dotenv/config';
+import "dotenv/config";
 import { db } from "./db"; // <-- your Drizzle instance
 import { users, transactions, assets, portfolioHoldings } from "./schema";
 
-// ...existing code...
+async function seed() {
+  console.log('🌱 Starting database seeding...');
 
-const TOTAL = 1000;
-const CHUNK_SIZE = 200;
+  try {
+    // Clear existing data (optional - comment out to keep existing data)
+    console.log('🗑️  Clearing existing data...');
+    await db.delete(portfolioHoldings);
+    await db.delete(transactions);
+    await db.delete(users);
+    await db.delete(assets);
 
-function chunkArray<T>(arr: T[], size = CHUNK_SIZE) {
-  const chunks: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    chunks.push(arr.slice(i, i + size));
-  }
-  return chunks;
-}
+    // 1. Create Assets
+    console.log('📊 Creating assets...');
+const assetsData = await db
+      .insert(assets)
+      .values([
+        {
+          symbol: 'AAPL',
+          name: 'Apple Inc.',
+          category: 'Technology',
+          currentPrice: '150.25',
+        },
+        {
+          symbol: 'GOOGL',
+          name: 'Alphabet Inc.',
+          category: 'Technology',
+          currentPrice: '140.50',
+        },
+        {
+          symbol: 'MSFT',
+          name: 'Microsoft Corporation',
+          category: 'Technology',
+          currentPrice: '380.75',
+        },
+        {
+          symbol: 'TSLA',
+          name: 'Tesla Inc.',
+          category: 'Automotive',
+          currentPrice: '242.35',
+        },
+        {
+          symbol: 'AMZN',
+          name: 'Amazon.com Inc.',
+          category: 'E-commerce',
+          currentPrice: '175.90',
+        },
+        {
+          symbol: 'META',
+          name: 'Meta Platforms Inc.',
+          category: 'Technology',
+          currentPrice: '485.50',
+        },
+        {
+          symbol: 'NVDA',
+          name: 'NVIDIA Corporation',
+          category: 'Semiconductors',
+          currentPrice: '875.25',
+        },
+        {
+          symbol: 'BRK.B',
+          name: 'Berkshire Hathaway Inc.',
+          category: 'Finance',
+          currentPrice: '385.40',
+        },
+      ])
+      .returning();
 
-function randInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+    console.log(`✅ Created ${assetsData.length} assets`);
 
-function randFloat(min: number, max: number, decimals = 2) {
-  return (Math.random() * (max - min) + min).toFixed(decimals);
-}
+    // 2. Create Users
+    console.log('👥 Creating users...');
+    const usersData = await db
+      .insert(users)
+      .values([
+        {
+          fullName: 'John Doe',
+          email: 'john@example.com',
+          accountType: 'Personal',
+        },
+        {
+          fullName: 'Jane Smith',
+          email: 'jane@example.com',
+          accountType: 'Business',
+        },
+        {
+          fullName: 'Robert Johnson',
+          email: 'robert@example.com',
+          accountType: 'Personal',
+        },
+        {
+          fullName: 'Emily Davis',
+          email: 'emily@example.com',
+          accountType: 'Personal',
+        },
+        {
+          fullName: 'Michael Wilson',
+          email: 'michael@example.com',
+          accountType: 'Business',
+        },
+        {
+          fullName: 'Sarah Brown',
+          email: 'sarah@example.com',
+          accountType: 'Personal',
+        },
+        {
+          fullName: 'David Miller',
+          email: 'david@example.com',
+          accountType: 'Personal',
+        },
+        {
+          fullName: 'Lisa Anderson',
+          email: 'lisa@example.com',
+          accountType: 'Business',
+        },
+        {
+          fullName: 'James Taylor',
+          email: 'james@example.com',
+          accountType: 'Personal',
+        },
+        {
+          fullName: 'Patricia Martinez',
+          email: 'patricia@example.com',
+          accountType: 'Personal',
+        },
+      ])
+      .returning();
 
-function generateUsers(n = TOTAL) {
-  const accountTypes = ["Personal", "Business", "Investor", "Institutional"];
-  const arr = [];
-  for (let i = 1; i <= n; i++) {
-    arr.push({
-      fullName: `User ${i}`,
-      email: `user${i}@example.com`,
-      accountType: accountTypes[i % accountTypes.length],
-    });
-  }
-  return arr;
-}
+    console.log(`✅ Created ${usersData.length} users`);
 
-function generateAssets(n = TOTAL) {
-  const categories = ["Stock", "Crypto", "ETF", "Bond"];
-  const arr = [];
-  for (let i = 1; i <= n; i++) {
-    const category = categories[i % categories.length];
-    // Give cryptos higher typical prices sometimes
-    const price =
-      category === "Crypto"
-        ? randFloat(100, 70000, 2)
-        : randFloat(1, 2000, 2);
-    arr.push({
-      symbol: `ASSET${String(i).padStart(4, "0")}`,
-      name: `Asset ${i}`,
-      category,
-      currentPrice: String(price),
-    });
-  }
-  return arr;
-}
+    // 3. Create Portfolio Holdings
+    console.log('💼 Creating portfolio holdings...');
+const holdingsData = await db
+      .insert(portfolioHoldings)
+      .values([
+        // User 1 holdings
+        {
+          userId: usersData[0].id,
+          assetId: assetsData[0].id, // AAPL
+          quantity: '50',
+          avgPrice: '145.00',
+        },
+        {
+          userId: usersData[0].id,
+          assetId: assetsData[1].id, // GOOGL
+          quantity: '25',
+          avgPrice: '135.00',
+        },
+        // User 2 holdings
+        {
+          userId: usersData[1].id,
+          assetId: assetsData[2].id, // MSFT
+          quantity: '100',
+          avgPrice: '370.00',
+        },
+        {
+          userId: usersData[1].id,
+          assetId: assetsData[3].id, // TSLA
+          quantity: '30',
+          avgPrice: '230.00',
+        },
+        // User 3 holdings
+        {
+          userId: usersData[2].id,
+          assetId: assetsData[4].id, // AMZN
+          quantity: '40',
+          avgPrice: '170.00',
+        },
+        // User 4 holdings
+        {
+          userId: usersData[3].id,
+          assetId: assetsData[5].id, // META
+          quantity: '15',
+          avgPrice: '470.00',
+        },
+        // User 5 holdings
+        {
+          userId: usersData[4].id,
+          assetId: assetsData[6].id, // NVDA
+          quantity: '10',
+          avgPrice: '850.00',
+        },
+      ])
+      .returning();
 
-async function seedUsers() {
-  const data = generateUsers();
-  const chunks = chunkArray(data);
-  for (const chunk of chunks) {
-    await db.insert(users).values(chunk);
-  }
-  console.log(`✅ ${data.length} Users seeded`);
-}
+    console.log(`✅ Created ${holdingsData.length} portfolio holdings`);
 
-async function seedAssets() {
-  const data = generateAssets();
-  const chunks = chunkArray(data);
-  for (const chunk of chunks) {
-    await db.insert(assets).values(chunk);
-  }
-  console.log(`✅ ${data.length} Assets seeded`);
-}
+    // 4. Create Transactions for the last 90 days
+    console.log('💳 Creating transactions...');
+const transactionsData: typeof transactions.$inferInsert[] = [];
 
-async function seedHoldings() {
-  const allUsers = await db.select().from(users);
-  const allAssets = await db.select().from(assets);
+    // Generate transactions for the last 90 days
+    const today = new Date();
+    for (let i = 0; i < 90; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
 
-  if (allUsers.length === 0 || allAssets.length === 0) {
-    throw new Error("Users or assets missing for holdings seeding");
-  }
+      // 2-5 transactions per day
+      const txCount = Math.floor(Math.random() * 4) + 2;
 
-  const holdingsData = [];
-  for (let i = 0; i < TOTAL; i++) {
-    const user = allUsers[randInt(0, allUsers.length - 1)];
-    const asset = allAssets[randInt(0, allAssets.length - 1)];
-    const qty = randFloat(0.01, 200, 6); // smaller precision for quantity
-    const avgPrice = randFloat(
-      Math.max(0.01, parseFloat(asset.currentPrice) * 0.5),
-      parseFloat(asset.currentPrice) * 1.5,
-      2
-    );
-    holdingsData.push({
-      userId: user.id,
-      assetId: asset.id,
-      quantity: String(qty),
-      avgPrice: String(avgPrice),
-    });
-  }
+      for (let j = 0; j < txCount; j++) {
+        const userId = usersData[Math.floor(Math.random() * usersData.length)].id;
+        const amountNum = Math.floor(Math.random() * 50000) + 1000; // $1k - $50k
+        const amountStr = amountNum.toString(); // Convert to string
+        const type = Math.random() > 0.7 ? 'withdrawal' : 'deposit'; // 70% deposits, 30% withdrawals
 
-  const chunks = chunkArray(holdingsData);
-  for (const chunk of chunks) {
-    await db.insert(portfolioHoldings).values(chunk);
-  }
-  console.log(`✅ ${holdingsData.length} Portfolio holdings seeded`);
-}
-
-async function seedTransactions() {
-  const allUsers = await db.select().from(users);
-  if (allUsers.length === 0) {
-    throw new Error("Users missing for transactions seeding");
-  }
-
-  const types = [
-    "Deposit",
-    "Withdrawal",
-    "Stock Purchase",
-    "Crypto Purchase",
-    "Fee",
-    "Dividend",
-  ];
-  const statusOptions = ["completed", "pending", "failed"];
-
-  const txData = [];
-  for (let i = 0; i < TOTAL; i++) {
-    const user = allUsers[randInt(0, allUsers.length - 1)];
-    const type = types[randInt(0, types.length - 1)];
-    // Deposits and dividends positive, purchases/withdrawals/fees negative
-    let amount = parseFloat(randFloat(1, 10000, 2));
-    if (["Withdrawal", "Stock Purchase", "Crypto Purchase", "Fee"].includes(type)) {
-      amount = -amount;
+        transactionsData.push({
+          userId,
+          amount: amountStr,
+          currency: 'USD',
+          type: type as 'deposit' | 'withdrawal' | 'trade',
+          status: 'completed',
+          createdAt: date,
+        });
+      }
     }
-    txData.push({
-      userId: user.id,
-      amount: String(amount.toFixed(2)),
-      currency: "USD",
-      type,
-      status: statusOptions[randInt(0, statusOptions.length - 1)],
-    });
-  }
 
-  const chunks = chunkArray(txData);
-  for (const chunk of chunks) {
-    await db.insert(transactions).values(chunk);
-  }
-  console.log(`✅ ${txData.length} Transactions seeded`);
+    // Insert transactions in batches (50 at a time)
+    for (let i = 0; i < transactionsData.length; i += 50) {
+      const batch = transactionsData.slice(i, i + 50);
+      await db.insert(transactions).values(batch);
+    }
+
+    console.log(`✅ Created ${transactionsData.length} transactions`);
+
+    console.log('');
+    console.log('✨ Database seeding completed successfully!');
+    console.log('');
+    console.log('📊 Summary:');
+    console.log(`   - Assets: ${assetsData.length}`);
+    console.log(`   - Users: ${usersData.length}`);
+    console.log(`   - Portfolio Holdings: ${holdingsData.length}`);
+    console.log(`   - Transactions: ${transactionsData.length}`);
+    console.log('');
+    console.log('🚀 Your dashboard is ready to display data!');
+  } catch (error) {
+    console.error('❌ Error seeding database:', error);
+    process.exit(1);
+  } 
 }
 
-async function runSeed() {
-  await seedUsers();
-  await seedAssets();
-  await seedHoldings();
-  await seedTransactions();
-  console.log("🌱 All data seeded successfully!");
-}
-
-runSeed().catch((err) => {
-  console.error("❌ Seeding failed:", err);
-});
+seed();

@@ -8,6 +8,7 @@ import assetsRouter from './routes/assets';
 import portfolioRouter from './routes/portfolio';
 import transactionsRouter from './routes/transactions';
 import dashboardRouter from './routes/dashboard';
+import cors from 'cors';
 
 // Initialize Express app
 const app = express();
@@ -15,6 +16,12 @@ const PORT = process.env.EXPRESS_PORT!;
 
 
 // Middleware
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
