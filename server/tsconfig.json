@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    // ... rest of config
+  }
+}
