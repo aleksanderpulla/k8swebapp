@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import express = require('express');
-import { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 
 // Import routes
 import usersRouter from './routes/users';
@@ -8,14 +8,11 @@ import assetsRouter from './routes/assets';
 import portfolioRouter from './routes/portfolio';
 import transactionsRouter from './routes/transactions';
 import dashboardRouter from './routes/dashboard';
-import cors from 'cors';
-import { d } from 'drizzle-kit/index-BAUrj6Ib';
 import documentsRouter from './routes/documents';
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.EXPRESS_PORT!;
-
+const PORT = process.env.EXPRESS_PORT || 5000;
 
 // Middleware
 app.use(cors({
