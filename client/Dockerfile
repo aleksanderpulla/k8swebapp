@@ -1,6 +1,5 @@
 # Stage 1: Build
 FROM node:22.20.0-alpine AS builder
-
 WORKDIR /app
 
 # Copy package files
@@ -12,12 +11,15 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Build argument for API URL (matches your local setup with /api)
+ARG VITE_API_URL=https://portfolio.local/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build with Vite
 RUN npm run build
 
 # Stage 2: Runtime
 FROM node:22.20.0-alpine
-
 WORKDIR /app
 
 # Install a lightweight static file server
