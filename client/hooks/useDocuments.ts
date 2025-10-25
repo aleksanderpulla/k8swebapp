@@ -22,7 +22,7 @@ export const useDocuments = () => {
     const fetchDocuments = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/documents`);
+        const response = await fetch(`${API_URL}/documents`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch documents: ${response.statusText}`);
