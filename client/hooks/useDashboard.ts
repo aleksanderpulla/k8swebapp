@@ -1,7 +1,7 @@
 // client/src/hooks/useDashboard.ts
 import { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL!;
 
 interface DashboardMetrics {
   totalRevenue: string;
@@ -35,7 +35,7 @@ export const useDashboardMetrics = () => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await fetch(`${API_URL}/dashboard/metrics`);
+        const response = await fetch(`${API_URL}/api/dashboard/metrics`);
         if (!response.ok) throw new Error('Failed to fetch metrics');
         const data = await response.json();
         setMetrics(data);
@@ -60,7 +60,7 @@ export const useDashboardVisitors = () => {
   useEffect(() => {
     const fetchVisitors = async () => {
       try {
-        const response = await fetch(`${API_URL}/dashboard/visitors`);
+        const response = await fetch(`${API_URL}/api/dashboard/visitors`);
         if (!response.ok) throw new Error('Failed to fetch visitor data');
         const data = await response.json();
         setChartData(data);
@@ -85,7 +85,7 @@ export const useDashboardPortfolio = () => {
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
-        const response = await fetch(`${API_URL}/dashboard/portfolio-summary`);
+        const response = await fetch(`${API_URL}/api/dashboard/portfolio-summary`);
         if (!response.ok) throw new Error('Failed to fetch portfolio');
         const data = await response.json();
         setPortfolio(data);

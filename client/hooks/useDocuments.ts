@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL!;
+
+
 export interface Document {
   id: number;
   header: string;
@@ -19,7 +22,7 @@ export const useDocuments = () => {
     const fetchDocuments = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/documents');
+        const response = await fetch(`${API_URL}/api/documents`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch documents: ${response.statusText}`);
