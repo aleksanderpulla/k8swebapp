@@ -34,6 +34,8 @@ import {
 
 export const description = "An interactive area chart with real visitor data"
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface VisitorData {
   date: string
   visitors: number
@@ -63,7 +65,7 @@ export function ChartAreaInteractive() {
     const fetchVisitorData = async () => {
       try {
         setLoading(true)
-        const response = await fetch("http://localhost:5000/api/dashboard/visitors")
+        const response = await fetch(`${API_URL}/dashboard/visitors`)
         
         if (!response.ok) {
           throw new Error(`Failed to fetch visitor data: ${response.statusText}`)
